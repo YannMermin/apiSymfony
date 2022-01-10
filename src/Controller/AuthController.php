@@ -12,11 +12,18 @@ use Symfony\Component\HttpFoundation\Request;
 #[Route('/api')]
 class AuthController extends AbstractController
 {
-    public function __construct(private UserRepository $userRepository, private Security $security, private SerializerInterface $serializer)
+    private $userRepository;
+    private $security;
+    private $serializer;
+
+    public function __construct(UserRepository $userRepository, Security $security, SerializerInterface $serializer)
     {
+        $this->userRepository = $userRepository;
+        $this->security = $security;
+        $this->serializer = $serializer;
     }
 
-    #[Route('/register', name: 'register')]
+    #[Route('/register', name: 'register', methods: ['POST'])]
     public function index(Request $request)
     {
         $formData = json_decode($request->getContent());

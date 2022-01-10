@@ -2,20 +2,43 @@
 
 namespace App\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use App\Service\Product;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 #[Route('/api')]
 class ApiProductController extends AbstractController
 {
-    /**
-     * @Route("/api/product", name="api_product_index", methods={"GET"})
-     */
-    #[Route('/product', name: 'product')]
-    public function index()
+    private $productSrvc;
+    private $serializer;
+
+    public function __construct(Product $productSrvc, SerializerInterface $serializer)
     {
+        $this->productSrvc = $productSrvc;
+        $this->serializer = $serializer;
+    }
+
+    #[Route('/search-product/{searchTerms}', name: 'search_product', methods: ['GET'])]
+    public function searchProduct(Request $request)
+    {
+        if ($request->get('searchTerms') && $request->get('searchTerms') !== '') {
+            $products = $this->productSrvc->fetchProductsApi($request->get('searchTerms'));
+
+            if ($products) {
+                return $this->json([
+                    'user' => $this->serializer->serialize($products, 'json')
+                ]);
+            }
+
+            return $this->json([
+                'message' => 'Aucun résultat à votre recherche.',
+            ]);
+        }
+
         return $this->json([
-            'message' => 'Welcome to your new controller!',
-        ], 200);
+            'message' => 'Aucune recherche précisée.',
+        ], 400);
     }
 }
