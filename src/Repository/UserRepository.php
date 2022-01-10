@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
@@ -17,7 +18,7 @@ use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
  */
 class UserRepository extends ServiceEntityRepository implements PasswordUpgraderInterface
 {
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(ManagerRegistry $registry, private UserPasswordHasherInterface $hasher)
     {
         parent::__construct($registry, User::class);
     }
@@ -36,32 +37,35 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $this->_em->flush();
     }
 
-    // /**
-    //  * @return User[] Returns an array of User objects
-    //  */
-    /*
-    public function findByExampleField($value)
-    {
-        return $this->createQueryBuilder('u')
-            ->andWhere('u.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('u.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-    */
 
-    /*
-    public function findOneBySomeField($value): ?User
-    {
-        return $this->createQueryBuilder('u')
-            ->andWhere('u.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
-    }
+    /* @return User[] Returns an array of User objects
+    *
     */
+    public function create($datas)
+    {
+        $checkExistsUser = ($this->findOneBy(['email' => $datas->email]));
+
+        if ($checkExistsUser) {
+            return [
+                'error' => true,
+                'message' => 'Cette adresse email est déjà utilisée'
+            ];
+        }
+
+        $user = new User();
+        $user->setName($datas->name)
+            ->setEmail($datas->email);
+
+        $password = $this->hasher->hashPassword($user, $datas->password);
+
+        $user->setPassword($password);
+
+        $this->_em->persist($user);
+        $this->_em->flush();
+
+        return [
+            'error' => false,
+            'user' => $user
+        ];
+    }
 }

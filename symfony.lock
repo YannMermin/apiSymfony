@@ -130,6 +130,9 @@
     "phpdocumentor/type-resolver": {
         "version": "1.6.0"
     },
+    "phpstan/phpdoc-parser": {
+        "version": "1.2.0"
+    },
     "psr/cache": {
         "version": "2.0.0"
     },
@@ -319,6 +322,9 @@
         "version": "v5.4.0"
     },
     "symfony/security-http": {
+        "version": "v5.4.2"
+    },
+    "symfony/serializer": {
         "version": "v5.4.2"
     },
     "symfony/service-contracts": {
