@@ -128,6 +128,18 @@ class Product
             }
         }
 
-        return null;
+        return false;
+    }
+
+    // Retire un produit des favoris de l'utilisateur
+    public function removeProductUserFavorites($codeEan, User $user)
+    {
+        return $this->userRepository->removeFavorite($codeEan, $user);
+    }
+
+    // Retire l'ensembles des favoris de l'utilisateur
+    public function clearProductUserFavorites(User $user)
+    {
+        return $this->userRepository->clearFavorites($user);
     }
 }

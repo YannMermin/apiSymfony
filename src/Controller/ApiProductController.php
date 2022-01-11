@@ -65,4 +65,38 @@ class ApiProductController extends AbstractController
             'message' => 'Aucun code renseigné.',
         ], 400);
     }
+
+    #[Route('/delete/{codeEan}', name: 'delete_favorite', methods: ['DELETE'])]
+    public function deleteProductFavorite(Request $request)
+    {
+        if ($request->get('codeEan') && $request->get('codeEan') !== '') {
+
+            $saveProduct = $this->productSrvc->removeProductUserFavorites($request->get('codeEan'), $this->getUser());
+
+            if ($saveProduct) {
+                return $this->json([
+                    'isProductRemoved' => true
+                ]);
+            }
+
+            return $this->json([
+                'isProductRemoved' => false,
+                'message' => 'Impossible de retirer le produit des favoris',
+            ]);
+        }
+
+        return $this->json([
+            'message' => 'Aucun code renseigné.',
+        ], 400);
+    }
+
+    #[Route('/clear', name: 'clear_favorites', methods: ['GET'])]
+    public function clearProductFavorites()
+    {
+        $this->productSrvc->clearProductUserFavorites($this->getUser());
+
+        return $this->json([
+            'isClearedFavorites' => true,
+        ]);
+    }
 }

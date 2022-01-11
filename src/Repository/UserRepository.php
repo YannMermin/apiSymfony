@@ -102,4 +102,43 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
 
         return true;
     }
+
+    /*
+    * Supprime un produit des favoris du User
+    */
+    public function removeFavorite($codeEan, User $user)
+    {
+        if ($user->getFavoritesProducts()->count()) {
+            foreach ($user->getFavoritesProducts() as $product) {
+                if ($product->getEan() === $codeEan) {
+                    $user->removeFavoritesProduct($product);
+
+                    $this->_em->persist($user);
+                    $this->_em->flush();
+
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /*
+    * Supprime les produits favoris du User
+    */
+    public function clearFavorites(User $user)
+    {
+        if ($user->getFavoritesProducts()->count()) {
+            foreach ($user->getFavoritesProducts() as $product) {
+
+                $user->removeFavoritesProduct($product);
+
+                $this->_em->persist($user);
+                $this->_em->flush();
+            }
+        }
+
+        return true;
+    }
 }
