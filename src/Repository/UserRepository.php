@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Product;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -18,8 +19,14 @@ use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
  */
 class UserRepository extends ServiceEntityRepository implements PasswordUpgraderInterface
 {
-    public function __construct(ManagerRegistry $registry, private UserPasswordHasherInterface $hasher)
+    private $hasher;
+    private $productRepository;
+
+    public function __construct(ManagerRegistry $registry, UserPasswordHasherInterface $hasher, ProductRepository $productRepository)
     {
+        $this->hasher = $hasher;
+        $this->productRepository = $productRepository;
+
         parent::__construct($registry, User::class);
     }
 
@@ -38,8 +45,8 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     }
 
 
-    /* @return User[] Returns an array of User objects
-    *
+    /*
+    * Création User
     */
     public function create($datas)
     {
@@ -67,5 +74,32 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             'error' => false,
             'user' => $user
         ];
+    }
+
+    /*
+    * Ajout produit aux favoris du User
+    */
+    public function addFavorite($productDatas, User $user)
+    {
+        // Si le produit existe, on le récupère
+
+        $product = $this->productRepository->findOneBy(['ean' => $productDatas['ean']]);
+
+        if (!$product) {
+            $product = new Product();
+            $product->setName($productDatas['name'])
+                ->setEan($productDatas['ean'])
+                ->setBrand($productDatas['brand']);
+
+            $this->_em->persist($product);
+            $this->_em->flush();
+        }
+
+        $user->addFavoritesProduct($product);
+
+        $this->_em->persist($user);
+        $this->_em->flush();
+
+        return true;
     }
 }

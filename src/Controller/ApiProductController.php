@@ -20,7 +20,7 @@ class ApiProductController extends AbstractController
         $this->serializer = $serializer;
     }
 
-    #[Route('/search-product/{searchTerms}', name: 'search_product', methods: ['GET'])]
+    #[Route('/search/{searchTerms}', name: 'search_product', methods: ['GET'])]
     public function searchProduct(Request $request)
     {
         if ($request->get('searchTerms') && $request->get('searchTerms') !== '') {
@@ -28,7 +28,7 @@ class ApiProductController extends AbstractController
 
             if ($products) {
                 return $this->json([
-                    'user' => $this->serializer->serialize($products, 'json')
+                    'products' => $this->serializer->serialize($products, 'json')
                 ]);
             }
 
@@ -39,6 +39,30 @@ class ApiProductController extends AbstractController
 
         return $this->json([
             'message' => 'Aucune recherche précisée.',
+        ], 400);
+    }
+
+    #[Route('/save/{codeEan}', name: 'save_favorite', methods: ['GET'])]
+    public function saveProductFavorite(Request $request)
+    {
+        if ($request->get('codeEan') && $request->get('codeEan') !== '') {
+
+            $saveProduct = $this->productSrvc->saveProductUserFavorites($request->get('codeEan'), $this->getUser());
+
+            if ($saveProduct) {
+                return $this->json([
+                    'isProductAdded' => true
+                ]);
+            }
+
+            return $this->json([
+                'isProductAdded' => false,
+                'message' => 'Impossible d\'ajouter le produit aux favoris',
+            ]);
+        }
+
+        return $this->json([
+            'message' => 'Aucun code renseigné.',
         ], 400);
     }
 }
