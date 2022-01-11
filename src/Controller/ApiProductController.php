@@ -24,7 +24,7 @@ class ApiProductController extends AbstractController
     public function searchProduct(Request $request)
     {
         if ($request->get('searchTerms') && $request->get('searchTerms') !== '') {
-            $products = $this->productSrvc->fetchProductsApi($request->get('searchTerms'));
+            $products = $this->productSrvc->fetchProductsApi($request->get('searchTerms'), $this->getUser());
 
             if ($products) {
                 return $this->json([
@@ -81,7 +81,7 @@ class ApiProductController extends AbstractController
 
             return $this->json([
                 'isProductRemoved' => false,
-                'message' => 'Impossible de retirer le produit des favoris',
+                'message' => 'Impossible de retirer le produit des favoris.',
             ]);
         }
 
@@ -98,5 +98,29 @@ class ApiProductController extends AbstractController
         return $this->json([
             'isClearedFavorites' => true,
         ]);
+    }
+
+    #[Route('/exclude/{codeEan}', name: 'exclude_product', methods: ['GET'])]
+    public function excludeProduct(Request $request)
+    {
+        if ($request->get('codeEan') && $request->get('codeEan') !== '') {
+
+            $excludeProduct = $this->productSrvc->excludeProductUser($request->get('codeEan'), $this->getUser());
+
+            if ($excludeProduct) {
+                return $this->json([
+                    'isProductExcluded' => true
+                ]);
+            }
+
+            return $this->json([
+                'isProductExcluded' => false,
+                'message' => 'Impossible d\'exclure le produit.',
+            ]);
+        }
+
+        return $this->json([
+            'message' => 'Aucun code renseigné.',
+        ], 400);
     }
 }

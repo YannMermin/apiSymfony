@@ -108,7 +108,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     */
     public function removeFavorite($codeEan, User $user)
     {
-        if ($user->getFavoritesProducts()->count()) {
+        if ($user->getFavoritesProducts()->count() > 0) {
             foreach ($user->getFavoritesProducts() as $product) {
                 if ($product->getEan() === $codeEan) {
                     $user->removeFavoritesProduct($product);
@@ -129,7 +129,7 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     */
     public function clearFavorites(User $user)
     {
-        if ($user->getFavoritesProducts()->count()) {
+        if ($user->getFavoritesProducts()->count() > 0) {
             foreach ($user->getFavoritesProducts() as $product) {
 
                 $user->removeFavoritesProduct($product);
@@ -138,6 +138,31 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
                 $this->_em->flush();
             }
         }
+
+        return true;
+    }
+
+    /*
+    * Ajout produit aux produits exclus du User
+    */
+    public function addExcluded($productDatas, User $user)
+    {
+        $product = $this->productRepository->findOneBy(['ean' => $productDatas['ean']]);
+
+        if (!$product) {
+            $product = new Product();
+            $product->setName($productDatas['name'])
+                ->setEan($productDatas['ean'])
+                ->setBrand($productDatas['brand']);
+
+            $this->_em->persist($product);
+            $this->_em->flush();
+        }
+
+        $user->addExcludedProduct($product);
+
+        $this->_em->persist($user);
+        $this->_em->flush();
 
         return true;
     }

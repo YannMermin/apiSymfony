@@ -32,9 +32,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\ManyToMany(targetEntity: Product::class, inversedBy: 'users')]
     private $favoritesProducts;
 
+    #[ORM\ManyToMany(targetEntity: Product::class, inversedBy: 'excludedUsers')]
+    #[ORM\JoinTable(name: 'user_excluded')]
+    private $ExcludedProducts;
+
     public function __construct()
     {
         $this->favoritesProducts = new ArrayCollection();
+        $this->ExcludedProducts = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -158,6 +163,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function removeFavoritesProduct(Product $favoritesProduct): self
     {
         $this->favoritesProducts->removeElement($favoritesProduct);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Product[]
+     */
+    public function getExcludedProducts(): Collection
+    {
+        return $this->ExcludedProducts;
+    }
+
+    public function addExcludedProduct(Product $excludedProduct): self
+    {
+        if (!$this->ExcludedProducts->contains($excludedProduct)) {
+            $this->ExcludedProducts[] = $excludedProduct;
+        }
+
+        return $this;
+    }
+
+    public function removeExcludedProduct(Product $excludedProduct): self
+    {
+        $this->ExcludedProducts->removeElement($excludedProduct);
 
         return $this;
     }

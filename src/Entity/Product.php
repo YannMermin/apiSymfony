@@ -27,10 +27,14 @@ class Product
     #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'favoritesProducts')]
     private $users;
 
+    #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'ExcludedProducts')]
+    private $excludedUsers;
+
     public function __construct()
     {
         $this->products = new ArrayCollection();
         $this->users = new ArrayCollection();
+        $this->excludedUsers = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -96,6 +100,33 @@ class Product
     {
         if ($this->users->removeElement($user)) {
             $user->removeFavoritesProduct($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|User[]
+     */
+    public function getExcludedUsers(): Collection
+    {
+        return $this->excludedUsers;
+    }
+
+    public function addExcludedUser(User $excludedUser): self
+    {
+        if (!$this->excludedUsers->contains($excludedUser)) {
+            $this->excludedUsers[] = $excludedUser;
+            $excludedUser->addExcludedProduct($this);
+        }
+
+        return $this;
+    }
+
+    public function removeExcludedUser(User $excludedUser): self
+    {
+        if ($this->excludedUsers->removeElement($excludedUser)) {
+            $excludedUser->removeExcludedProduct($this);
         }
 
         return $this;
