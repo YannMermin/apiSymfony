@@ -93,8 +93,6 @@ class Product
                             $indexProductPage++;
                         }
 
-                        dd($resPaginated);
-
                         return $resPaginated;
                     }
                 }
