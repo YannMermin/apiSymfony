@@ -40,7 +40,7 @@ SEARCH PRODUCT | Type GET:
 
 http://localhost/api-symfony/public/api/search/nutella
 
-/!\ Il faut rensigner le type d'authentification Bearer avec le token retourné via l'appel LOGIN précédent (idem pour l'ensemble des appels qui vont suivre). /!\
+/!\ Il faut renseigner le type d'authentification Bearer avec le token retourné via l'appel LOGIN précédent (idem pour l'ensemble des appels qui vont suivre). /!\
 ------------------------------------
 
 ------------------------------------
